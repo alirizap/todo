@@ -1,5 +1,9 @@
 from uuid import uuid4
 from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from django.utils.text import slugify
+from todo.utils import random_string_generator
 from user.models import User 
 from category.models import Category
 
@@ -18,3 +22,15 @@ class Todo(models.Model):
 
     def __str__(self):
         return self.title 
+
+
+@receiver(pre_save, sender=Todo)
+def uniqe_slug(sender, instance, **kwargs):
+    if not instance.slug:
+        while True:
+            new_slug = slugify(f"{instance.title}-{random_string_generator()}")
+            exists = Todo.objects.filter(slug=new_slug).exists()
+            if not exists:
+                break 
+            
+        instance.slug = new_slug
