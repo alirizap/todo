@@ -1,0 +1,1 @@
+A simple todo app written with django
